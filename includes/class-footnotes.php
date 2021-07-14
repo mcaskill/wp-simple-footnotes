@@ -136,7 +136,7 @@ class Footnotes implements \Countable, \IteratorAggregate
     {
         $this->upgrade();
 
-        load_plugin_textdomain( 'simple_footnotes' );
+        $this->load_textdomain();
 
         add_settings_field(
             'simple_footnotes_placement',
@@ -155,6 +155,25 @@ class Footnotes implements \Countable, \IteratorAggregate
             add_filter( 'mce_external_plugins',   [ $this, 'mce_external_plugins' ] );
             add_filter( 'mce_external_languages', [ $this, 'mce_external_languages' ] );
         }
+    }
+
+    /**
+     * Load the plugin's localizations.
+     *
+     * @fires  WP#filter:plugin_locale
+     *
+     * @param  string|null $domain The plugin's text domain.
+     * @return bool
+     */
+    public function load_textdomain() : bool
+    {
+        $domain = 'simple_footnotes';
+        $locale = determine_locale();
+        $locale = apply_filters( 'plugin_locale', $locale, $domain );
+        $mofile = $locale . '.mo';
+        $mopath = dirname( __DIR__ ) . '/resources/languages/' . $mofile;
+
+        return load_textdomain( $domain, $mopath );
     }
 
     /**
@@ -946,7 +965,7 @@ class Footnotes implements \Countable, \IteratorAggregate
         $html = '<aside class="simple-footnotes-references">';
 
         if ( ! $is_comment ) {
-            load_plugin_textdomain( 'simple_footnotes' );
+            $this->load_textdomain();
             $html .= '<p class="simple-footnotes-references-title">' . __( 'Notes:', 'simple_footnotes' ) . '</p>';
         }
 
