@@ -417,9 +417,21 @@ class Footnotes implements \Countable, \IteratorAggregate
             return $shortcode_text;
         }
 
+        if ( ( $i = array_search( 'preview', $shortcode_attrs, true ) ) !== false ) {
+            $shortcode_attrs['preview'] = true;
+            unset( $shortcode_attrs[$i] );
+        }
+
+        if ( ( $i = array_search( 'hidden', $shortcode_attrs, true ) ) !== false ) {
+            $shortcode_attrs['hidden'] = true;
+            unset( $shortcode_attrs[$i] );
+        }
+
         $shortcode_attrs = wp_parse_args( $shortcode_attrs, [
-            'id'   => null,
-            'note' => null,
+            'id'      => null,
+            'note'    => null,
+            'preview' => false,
+            'hidden'  => false,
             //'mark' => null,
         ] );
 
@@ -500,7 +512,7 @@ class Footnotes implements \Countable, \IteratorAggregate
             );
         }
 
-        if ( in_array( 'hidden', $shortcode_attrs ) ) {
+        if ( $shortcode_attrs['hidden'] ) {
             $note->hidden = true;
         }
 
@@ -593,7 +605,7 @@ class Footnotes implements \Countable, \IteratorAggregate
 
         $_ref_class = [ 'simple-footnote-reference' ];
 
-        if ( in_array( 'preview', $shortcode_attrs ) ) {
+        if ( $shortcode_attrs['preview'] ) {
             $_ref_class[] = 'simple-footnote-preview';
         }
 
