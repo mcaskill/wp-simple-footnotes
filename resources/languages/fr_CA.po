@@ -1,0 +1,109 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Footnotes\n"
+"POT-Creation-Date: 2021-07-14 14:37-0400\n"
+"PO-Revision-Date: 2021-07-14 14:38-0400\n"
+"Last-Translator: Chauncey McAskill <chauncey@locomotive.ca>\n"
+"Language-Team: \n"
+"Language: fr_CA\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Poedit 3.0\n"
+"X-Poedit-Basepath: ../..\n"
+"X-Poedit-Flags-xgettext: --add-comments=translators:\n"
+"X-Poedit-WPHeader: simple-footnotes.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;_n:1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;esc_attr__;"
+"esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;_n_noop:1,2;"
+"_nx_noop:3c,1,2;__ngettext_noop:1,2\n"
+"X-Poedit-SearchPath-0: includes\n"
+"X-Poedit-SearchPath-1: resources/tinymce\n"
+"X-Poedit-SearchPathExcluded-0: *.js\n"
+"X-Poedit-SearchPathExcluded-1: *.css\n"
+"X-Poedit-SearchPathExcluded-2: vendor\n"
+"X-Poedit-SearchPathExcluded-3: node_modules\n"
+
+#: includes/class-footnotes.php:143
+msgid "Footnotes placement"
+msgstr "Placement des notes de bas de page"
+
+#: includes/class-footnotes.php:260
+msgid "Below content"
+msgstr "Sous le contenu"
+
+#: includes/class-footnotes.php:261
+msgid "Below page links"
+msgstr "Sous les liens de page"
+
+#: includes/class-footnotes.php:262
+msgid "Custom"
+msgstr "Personnalisé"
+
+#: includes/class-footnotes.php:935
+msgid "Notes:"
+msgstr "Notes :"
+
+#: resources/tinymce/translations.php:18 resources/tinymce/translations.php:19
+msgid "Insert/edit footnote"
+msgstr "Insérer/modifier la note de bas de page"
+
+#: resources/tinymce/translations.php:20
+msgid "Global note"
+msgstr "Note globale"
+
+#: resources/tinymce/translations.php:21
+msgid "Select a note"
+msgstr "Sélectionnez une note"
+
+#: resources/tinymce/translations.php:22
+msgid "You must select a note."
+msgstr "Vous devez sélectionner une note."
+
+#: resources/tinymce/translations.php:23
+msgid "Or, custom note"
+msgstr "Ou, note personnalisée"
+
+#: resources/tinymce/translations.php:24
+msgid "Custom note"
+msgstr "Note personnalisée"
+
+#: resources/tinymce/translations.php:25
+msgid "Show note when you hover on the marker"
+msgstr "Afficher la note lorsque vous survolez le marqueur"
+
+#: resources/tinymce/translations.php:26
+msgid "Hide note in footnotes"
+msgstr "Cacher la note dans les notes de bas de page"
+
+#: resources/tinymce/translations.php:27
+msgid "You must select text to add note."
+msgstr "Vous devez sélectionner le texte pour ajouter une note."
+
+#. Plugin Name of the plugin/theme
+msgid "Simple Footnotes"
+msgstr "Notes de bas de page simples"
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/mcaskill/wp-simple-footnotes"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Create simple, elegant footnotes on your site. Use the <code>[ref note=\"My "
+"note.\" /]</code> shortcode (<code>[ref note=\"My note.\"]My marker.[/ref]</"
+"code>) and the plugin takes care of the rest. There's also a <a href="
+"\"options-reading.php\">setting</a> that enables you to move the footnotes "
+"below your page links, for those who paginate posts."
+msgstr ""
+"Créez des notes de bas de page simples et élégantes sur votre site. Utilisez "
+"<code>[ref note=\"My note.\" /]</code> le shortcode ( <code>[ref note=\"My "
+"note.\"]My marker.[/ref]</code> ) et le plugin prend soin du reste. Il "
+"existe également un paramètre <a href=\"options-reading.php\">qui vous</a> "
+"permet de déplacer les notes de bas de page sous les liens de votre page, "
+"pour ceux qui paginent les publications."
+
+#. Author of the plugin/theme
+msgid "Chauncey McAskill, Andrew Nacin"
+msgstr ""
