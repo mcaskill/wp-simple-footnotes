@@ -105,7 +105,7 @@
             return {
                 title:    editor.getLang( this.PLUGIN_NAME + '.dialogTitle' ),
                 body:     [],
-                height:   ( this.useGlobalNotes ? 184 : 154 ),
+                height:   ( this.useGlobalNotes ? 244 : 214 ),
                 width:    480,
                 onSubmit: this.handleDialogSubmit.bind( this, editor )
             };
@@ -137,7 +137,8 @@
                 text:  editor.getLang( this.PLUGIN_NAME + ( this.useGlobalNotes ? '.orTextLabel' : '.textLabel' ) ),
             } );
             dialogSettings.body.push( this.createNoteTextFormControlSettings( editor ) );
-            // dialogSettings.body.push( this.createNotePreviewFormControlSettings( editor ) );
+            dialogSettings.body.push( this.createNotePreviewFormControlSettings( editor ) );
+            dialogSettings.body.push( this.createNoteHideFormControlSettings( editor ) );
 
             editor.windowManager.open( dialogSettings );
         },
@@ -224,19 +225,43 @@
          * @return {object}
          */
         createNotePreviewFormControlSettings: function ( editor ) {
-            var previewCtrl, checkedPreview, shortcode;
+            var previewCtrl, checked, shortcode;
 
-            shortcode    = this.getShortcodeFrom( editor );
-            checkedPreview = ( shortcode && shortcode.get(0) || false );
+            shortcode = this.getShortcodeFrom( editor );
+            checked   = ( ( shortcode && ( shortcode.attrs.numeric.indexOf('preview') > -1 ) ) || false );
+
+            console.log('shortcode:', shortcode);
 
             previewCtrl = {
                 name:      'preview',
                 type:      'checkbox',
-                checked:   checkedPreview,
+                checked:   checked,
                 text:      editor.getLang( this.PLUGIN_NAME + '.previewLabel' )
             };
 
             return previewCtrl;
+        },
+
+        /**
+         * Creates the TinyMCE form control settings for the Note hidden checkbox.
+         *
+         * @param  {tinymce.Editor} editor - The related editor instance.
+         * @return {object}
+         */
+        createNoteHideFormControlSettings: function ( editor ) {
+            var hideCtrl, checked, shortcode;
+
+            shortcode = this.getShortcodeFrom( editor );
+            checked   = ( ( shortcode && ( shortcode.attrs.numeric.indexOf('hidden') > -1 ) ) || false );
+
+            hideCtrl = {
+                name:      'hidden',
+                type:      'checkbox',
+                checked:   checked,
+                text:      editor.getLang( this.PLUGIN_NAME + '.hiddenLabel' )
+            };
+
+            return hideCtrl;
         },
 
         /**
@@ -319,9 +344,13 @@
                 }
             }*/
 
-            // if ( event.data.preview && ( typeof event.data.preview === 'boolean' ) ) {
+            if ( event.data.preview && ( typeof event.data.preview === 'boolean' ) ) {
                 attrs.numeric.push('preview');
-            // }
+            }
+
+            if ( event.data.hidden && ( typeof event.data.hidden === 'boolean' ) ) {
+                attrs.numeric.push('hidden');
+            }
 
             console.log( 'attrs:', attrs );
 
@@ -332,7 +361,7 @@
                 return false;
             } else {
                 html = wp.shortcode.string( {
-                    type:    (content ? 'closed' : 'single'),
+                    type:    ( content ? 'closed' : 'single' ),
                     tag:     Footnotes.SHORTCODE_TAG,
                     attrs:   attrs,
                     content: content
@@ -350,61 +379,3 @@
          editor.addButton( Footnotes.PLUGIN_NAME, Footnotes.getToolbarButtonSettings( editor ) );
     } );
 } )( window.tinymce, window.wp );
-
-/*
-( function ( tinymce ) {
-
-    var PLUGIN_NAME = 'simple_footnotes';
-
-    tinymce.PluginManager.add( PLUGIN_NAME, function ( editor, url ) {
-        var textCtrl, previewCtrl;
-
-        textCtrl = {
-            name:      'text',
-            type:      'textbox',
-            multiline: true,
-            autofocus: true,
-            ariaLabel: editor.getLang( PLUGIN_NAME + '.textLabel' )
-        };
-
-        previewCtrl = {
-            name:      'preview',
-            type:      'checkbox',
-            checked:   true,
-            text:      editor.getLang( PLUGIN_NAME + '.previewLabel' )
-        };
-
-        editor.addButton( PLUGIN_NAME, {
-            title:   editor.getLang( PLUGIN_NAME + '.dialogTitle' ),
-            icon:    'anchor',
-            classes: 'btn-' + PLUGIN_NAME.replace( '_', '-' ),
-            onclick: function () {
-                editor.windowManager.open( {
-                    title: editor.getLang( PLUGIN_NAME + '.dialogTitle' ),
-                    body:  [
-                        textCtrl,
-                        previewCtrl
-                    ],
-                    height:   104,
-                    width:    480,
-                    onsubmit: function ( event ) {
-                        var attr = [];
-
-                        if ( event.data.text && ( typeof event.data.text === 'string' ) ) {
-                            event.data.text = event.data.text.trim();
-                        }
-
-                        if ( event.data.preview && ( typeof event.data.preview === 'boolean' ) ) {
-                            attr.push( ' preview' );
-                        }
-
-                        if ( event.data.text ) {
-                            editor.insertContent( '[ref' + attr.join('') + ']' + event.data.text + '[/ref]' );
-                        }
-                    }
-                } );
-            }
-        } );
-    } );
-} )( window.tinymce );
-*/

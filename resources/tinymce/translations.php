@@ -22,7 +22,8 @@ $messages = [
     'idRequired'        => __( 'You must select a note.', 'simple_footnotes' ),
     'orTextLabel'       => __( 'Or, custom note', 'simple_footnotes' ),
     'textLabel'         => __( 'Custom note', 'simple_footnotes' ),
-    'previewLabel'      => __( 'Show when you hover on the marker', 'simple_footnotes' ),
+    'previewLabel'      => __( 'Show note when you hover on the marker', 'simple_footnotes' ),
+    'hiddenLabel'       => __( 'Hide note in footnotes', 'simple_footnotes' ),
     'selectionRequired' => __( 'You must select text to add note.', 'simple_footnotes' ),
 ];
 

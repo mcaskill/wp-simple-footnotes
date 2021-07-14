@@ -379,8 +379,8 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @fires filter:footnote_note_mark
      * @fires filter:footnote_reference_mark
      * @fires filter:footnote_reference_text
-     * @fires filter:footnote_reference_link_html
-     * @fires filter:footnote_reference_html
+     * @fires filter:footnote_reference_link_html_template
+     * @fires filter:footnote_reference_html_template
      *
      * @param  array       $shortcode_attrs Shortcode attributes.
      * @param  string|null $shortcode_text  The content within the shortcode tags.
@@ -410,8 +410,9 @@ class Footnotes implements \Countable, \IteratorAggregate
             $note = static::get_global_note( $shortcode_attrs['id'] );
         } elseif ( isset( $shortcode_attrs['note'] ) ) {
             $note = (object) [
-                'id'   => crc32( $shortcode_attrs['note'] ),
-                'text' => $shortcode_attrs['note'],
+                'id'     => crc32( $shortcode_attrs['note'] ),
+                'text'   => $shortcode_attrs['note'],
+                'hidden' => false,
             ];
         }
 
@@ -442,24 +443,46 @@ class Footnotes implements \Countable, \IteratorAggregate
              * @param  string      $type  The current object type.
              * @param  int         $id    The post or comment ID.
              * @param  object      $note  The footnote instance.
-             * @param  string|null $text  The related reference text.
+             * @param  string|null $text  The shortcode text; related reference text.
+             * @param  array       $attrs The shortcode attributes.
              * @return int A number or mark.
              */
-            $note->index = apply_filters( 'footnote_note_index', $note->index, $type, $id, $note, $shortcode_text );
+            $note->index = apply_filters(
+                'footnote_note_index',
+                $note->index,
+                $type,
+                $id,
+                $note,
+                $shortcode_text,
+                $shortcode_attrs
+            );
 
             /**
              * Filters the footnote marker based on the #.
              *
              * @event filter:footnote_note_mark
              *
-             * @param  int|string  $mark The reference number or symbol. Defaults to the next sequential number.
-             * @param  string      $type The current object type.
-             * @param  int         $id   The post or comment ID.
-             * @param  object      $note The footnote instance.
-             * @param  string|null $text The related reference text.
+             * @param  int|string  $mark  The reference number or symbol. Defaults to the next sequential number.
+             * @param  string      $type  The current object type.
+             * @param  int         $id    The post or comment ID.
+             * @param  object      $note  The footnote instance.
+             * @param  string|null $text  The shortcode text; related reference text.
+             * @param  array       $attrs The shortcode attributes.
              * @return int|string A number or symbol.
              */
-            $note->mark = apply_filters( 'footnote_note_mark', $note->index, $type, $id, $note, $shortcode_text );
+            $note->mark = apply_filters(
+                'footnote_note_mark',
+                $note->index,
+                $type,
+                $id,
+                $note,
+                $shortcode_text,
+                $shortcode_attrs
+            );
+        }
+
+        if ( in_array( 'hidden', $shortcode_attrs ) ) {
+            $note->hidden = true;
         }
 
         if ( is_null( $shortcode_text ) ) {
@@ -468,28 +491,46 @@ class Footnotes implements \Countable, \IteratorAggregate
              *
              * @event filter:footnote_reference_mark
              *
-             * @param  int|string  $mark The reference number or symbol. Defaults to the next sequential number.
-             * @param  string      $type The current object type.
-             * @param  int         $id   The post or comment ID.
-             * @param  object      $note The footnote instance.
-             * @param  string|null $text The related reference text.
+             * @param  int|string  $mark  The reference number or symbol. Defaults to the next sequential number.
+             * @param  string      $type  The current object type.
+             * @param  int         $id    The post or comment ID.
+             * @param  object      $note  The footnote instance.
+             * @param  string|null $text  The shortcode text; related reference text.
+             * @param  array       $attrs The shortcode attributes.
              * @return int|string A number or symbol.
              */
-            $ref_mark = apply_filters( 'footnote_reference_mark', $note->mark, $type, $id, $note, $shortcode_text );
+            $ref_mark = apply_filters(
+                'footnote_reference_mark',
+                $note->mark,
+                $type,
+                $id,
+                $note,
+                $shortcode_text,
+                $shortcode_attrs
+            );
         } else {
             /**
              * Filters the footnote reference text.
              *
              * @event filter:footnote_reference_text
              *
-             * @param  int|string  $text The reference text. Defaults to the shortcode's enclosed content.
-             * @param  string      $type The current object type.
-             * @param  int         $id   The post or comment ID.
-             * @param  object      $note The footnote instance.
-             * @param  string|null $text The related reference text.
+             * @param  int|string  $text  The reference text. Defaults to the shortcode's enclosed content.
+             * @param  string      $type  The current object type.
+             * @param  int         $id    The post or comment ID.
+             * @param  object      $note  The footnote instance.
+             * @param  string|null $text  The shortcode text; related reference text.
+             * @param  array       $attrs The shortcode attributes.
              * @return int|string
              */
-            $ref_mark = apply_filters( 'footnote_reference_text', $shortcode_text, $type, $id, $note, $shortcode_text );
+            $ref_mark = apply_filters(
+                'footnote_reference_text',
+                $shortcode_text,
+                $type,
+                $id,
+                $note,
+                $shortcode_text,
+                $shortcode_attrs
+            );
         }
 
         $note->refs[] = $ref_mark;
@@ -509,22 +550,24 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML anchor tag template of a footnote.
          *
-         * @event filter:footnote_reference_link_html
+         * @event filter:footnote_reference_link_html_template
          *
          * @param  string      $link_html The HTML anchor tag of a footnote.
          * @param  string      $type      The current object type.
          * @param  int         $id        The post or comment ID.
          * @param  object      $note      The footnote instance.
-         * @param  string|null $text      The related reference text.
+         * @param  string|null $text      The shortcode text; related reference text.
+         * @param  array       $attrs     The shortcode attributes.
          * @return string The filtered HTML link to a footnote.
          */
         $_link_html = apply_filters(
-            'footnote_reference_link_html',
+            'footnote_reference_link_html_template',
             '<a href="#{note_id}">{ref_text}</a>',
             $type,
             $id,
             $note,
-            $shortcode_text
+            $shortcode_text,
+            $shortcode_attrs
         );
 
         $_ref_args['{link_html}'] = strtr( $_link_html, $_ref_args );
@@ -538,22 +581,24 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML marker tag of a footnote.
          *
-         * @event filter:footnote_reference_html
+         * @event filter:footnote_reference_html_template
          *
          * @param  string      $ref_html The HTML marker tag of a footnote.
          * @param  string      $type     The current object type.
          * @param  int         $id       The post or comment ID.
          * @param  object      $note     The footnote instance.
-         * @param  string|null $text     The related reference text.
+         * @param  string|null $text     The shortcode text; related reference text.
+         * @param  array       $attrs    The shortcode attributes.
          * @return string The filtered HTML link to a footnote.
          */
         $_ref_html = apply_filters(
-            'footnote_reference_html',
+            'footnote_reference_html_template',
             '<{html} id="{ref_id}" class="' . implode( ' ', $_ref_class ) . '">{link_html}</{html}>',
             $type,
             $id,
             $note,
-            $shortcode_text
+            $shortcode_text,
+            $shortcode_attrs
         );
 
         return strtr( $_ref_html, $_ref_args );
@@ -715,10 +760,10 @@ class Footnotes implements \Countable, \IteratorAggregate
     /**
      * Renders the collected footnotes as an HTML list.
      *
-     * @fires filter:footnote_reference_item_html
-     * @fires filter:footnote_reference_backlinks_html
-     * @fires filter:footnote_reference_note_html
-     * @fires filter:footnote_reference_list_html
+     * @fires filter:footnote_reference_item_html_template
+     * @fires filter:footnote_reference_backlinks_html_template
+     * @fires filter:footnote_reference_note_html_template
+     * @fires filter:footnote_reference_list_html_template
      *
      * @global int    $numpages Number of pages in the current post.
      * @global string $pagenow  Current Admin page.
@@ -754,15 +799,15 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML list item template of a footnote.
          *
-         * @event filter:footnote_reference_item_html
+         * @event filter:footnote_reference_item_html_template
          *
          * @param  string $item_html The HTML list item of a footnote.
          * @param  string $type      The current object type.
          * @param  int    $id        The post or comment ID.
-         * @return string The filtered HTML link to a footnote.
+         * @return string The filtered HTML list item to a footnote.
          */
         $_item_html = apply_filters(
-            'footnote_reference_item_html',
+            'footnote_reference_item_html_template',
             '<li id="{note_id}" value="{note_mark}">{back_html} {note_html}</li>',
             $type,
             $id
@@ -771,7 +816,7 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML backlinks template of a footnote.
          *
-         * @event filter:footnote_reference_backlinks_html
+         * @event filter:footnote_reference_backlinks_html_template
          *
          * @param  string $back_html The HTML backlists list of a footnote.
          * @param  string $type      The current object type.
@@ -779,7 +824,7 @@ class Footnotes implements \Countable, \IteratorAggregate
          * @return string The filtered HTML link to a footnote.
          */
         $_back_html = apply_filters(
-            'footnote_reference_backlinks_html',
+            'footnote_reference_backlinks_html_template',
             '<span class="simple-footnote-backlink"><a href="#{ref_id}">{back_mark}</a></span>',
             $type,
             $id
@@ -788,7 +833,7 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML text template of a footnote.
          *
-         * @event filter:footnote_reference_note_html
+         * @event filter:footnote_reference_note_html_template
          *
          * @param  string $note_html The HTML text of a footnote.
          * @param  string $type      The current object type.
@@ -796,7 +841,7 @@ class Footnotes implements \Countable, \IteratorAggregate
          * @return string The filtered HTML link to a footnote.
          */
         $_note_html = apply_filters(
-            'footnote_reference_note_html',
+            'footnote_reference_note_html_template',
             '<span class="simple-footnote-reference-text">{note_text}</span>',
             $type,
             $id
@@ -826,7 +871,28 @@ class Footnotes implements \Countable, \IteratorAggregate
 
             $args['{back_html}'] = implode( ' ', $args['{back_html}'] );
 
-            $items[] = strtr( $_item_html, $args );
+            $item = strtr( $_item_html, $args );
+
+            /**
+             * Filters the HTML list item of a footnote.
+             *
+             * @event filter:footnote_reference_item_html
+             *
+             * @param  string $item_html The HTML list item of a footnote.
+             * @param  string $type      The current object type.
+             * @param  int    $id        The post or comment ID.
+             * @param  object $note      The footnote instance.
+             * @return string The filtered HTML list item of a footnote.
+             */
+            $item = apply_filters(
+                'footnote_reference_item_html',
+                $item,
+                $type,
+                $id,
+                $note
+            );
+
+            $items[] = $item;
         }
 
         if ( empty( $items ) ) {
@@ -836,15 +902,15 @@ class Footnotes implements \Countable, \IteratorAggregate
         /**
          * Filters the HTML list template of a footnote.
          *
-         * @event filter:footnote_reference_list_html
+         * @event filter:footnote_reference_list_html_template
          *
          * @param  string $list_html The HTML list of a footnote.
          * @param  string $type      The current object type.
          * @param  int    $id        The post or comment ID.
-         * @return string The filtered HTML link to a footnote.
+         * @return string The filtered HTML list for footnotes.
          */
         $_list_html = apply_filters(
-            'footnote_reference_list_html',
+            'footnote_reference_list_html_template',
             '<ol start="{start}">{items_html}</ol>',
             $type,
             $id
