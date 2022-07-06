@@ -105,7 +105,7 @@
             return {
                 title:    editor.getLang( this.PLUGIN_NAME + '.dialogTitle' ),
                 body:     [],
-                height:   ( this.useGlobalNotes ? 244 : 214 ),
+                height:   ( this.useGlobalNotes ? 264 : 234 ),
                 width:    480,
                 onSubmit: this.handleDialogSubmit.bind( this, editor )
             };
