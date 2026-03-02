@@ -5,84 +5,78 @@ namespace McAskill\WordPress\Footnotes;
 /**
  * Simple Footnotes for WordPress
  */
-class Footnotes implements \Countable, \IteratorAggregate
+class Footnotes implements
+    \Countable,
+    \IteratorAggregate
 {
     public const SHORTCODE_TAG         = 'ref';
     public const AJAX_GET_GLOBAL_NOTES = 'simple_footnotes_get_global_notes';
 
     /**
-     * @var object[] $global_notes_list A list of global notes.
+     * @var ?list<object> A list of global notes.
      */
-    protected static $global_notes_list;
+    protected static ?array $global_notes_list = null;
 
     /**
-     * @var array<string, object> $global_notes_map A map of global notes.
+     * @var ?array<string, object> A map of global notes.
      */
-    protected static $global_notes_map;
+    protected static ?array $global_notes_map = null;
 
     /**
-     * @var int $global_notes_count The number of available global notes.
+     * The number of available global notes.
      */
-    protected static $global_notes_count = 0;
+    protected static int $global_notes_count = 0;
 
     /**
-     * @var bool $has_any_global_notes Whether any global notes are available.
+     * Whether any global notes are available.
      */
-    protected static $has_any_global_notes = false;
+    protected static bool $has_any_global_notes = false;
 
     /**
-     * @var bool $has_many_global_notes Whether many global notes are available.
+     * Whether many global notes are available.
      */
-    protected static $has_many_global_notes = false;
+    protected static bool $has_many_global_notes = false;
 
     /**
      * Store the footnotes and references to render.
      *
      * @var array<string, array<int, array<string, object>>>
      */
-    protected $footnotes = [];
+    protected array $footnotes = [];
 
     /**
      * Store the footnote numbering for the currently paginated posts.
      *
-     * @var array
+     * @var array<int, array<int, int>>
      */
-    protected $pagination = [];
+    protected array $pagination = [];
 
     /**
      * The plugin's current settings.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $options = [];
+    protected array $options = [];
 
     /**
      * The location for footnotes, derived from current settings.
-     *
-     * @var string
      */
-    protected $placement = 'the_content';
+    protected string $placement = 'the_content';
 
     /**
      * The plugin's option name.
-     *
-     * @var string
      */
-    protected $option_name = 'simple_footnotes';
+    protected string $option_name = 'simple_footnotes';
 
     /**
      * The plugin's database version number, for schema upgrades.
-     *
-     * @var int
      */
-    protected $db_version = 2;
+    protected int $db_version = 2;
 
     /**
      * Bootstraps the plugin.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot() : void
     {
         add_action( 'init',       [ $this, 'init' ] );
         add_action( 'admin_init', [ $this, 'admin_init' ] );
@@ -92,10 +86,8 @@ class Footnotes implements \Countable, \IteratorAggregate
      * Initializes the plugin's global functionality.
      *
      * @listens WP#action:init
-     *
-     * @return void
      */
-    public function init()
+    public function init() : void
     {
         $this->load_settings();
 
@@ -129,10 +121,8 @@ class Footnotes implements \Countable, \IteratorAggregate
      * Initializes the plugin's admin functionality.
      *
      * @listens WP#action:admin_init
-     *
-     * @return void
      */
-    public function admin_init()
+    public function admin_init() : void
     {
         $this->upgrade();
 
@@ -160,10 +150,7 @@ class Footnotes implements \Countable, \IteratorAggregate
     /**
      * Load the plugin's localizations.
      *
-     * @fires  WP#filter:plugin_locale
-     *
-     * @param  string|null $domain The plugin's text domain.
-     * @return bool
+     * @fires WP#filter:plugin_locale
      */
     public function load_textdomain() : bool
     {
@@ -181,8 +168,6 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#action:wp_ajax_{$action}
      * @listens WP#action:wp_ajax_nopriv_{$action}
-     *
-     * @return void
      */
     public function wp_ajax_get_global_notes() : void
     {
@@ -196,9 +181,9 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#filter:default_option_{$option}
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function get_default_settings()
+    public function get_default_settings() : array
     {
         return [
             'db_version' => $this->db_version,
@@ -208,11 +193,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Parses the given placement.
-     *
-     * @param  mixed $placement The placement to parse.
-     * @return ?string
      */
-    public function parse_placement( $placement )
+    public function parse_placement( string $placement ) : ?string
     {
         if ( in_array( $placement, $this->get_valid_placements() ) ) {
             if ( 'page_links' === $placement && is_feed() ) {
@@ -232,9 +214,9 @@ class Footnotes implements \Countable, \IteratorAggregate
      * must be explicitely invoked either from the `[reflist]`
      * shortcode or programmatically in the template file.
      *
-     * @return array The placement options.
+     * @return string[] The placement options.
      */
-    public function get_valid_placements()
+    public function get_valid_placements() : array
     {
         return [
             'the_content',
@@ -249,9 +231,9 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @listens WP#filter:sanitize_option_{$option}
      *
      * @param  mixed $input The user options to process.
-     * @return array The processed settings.
+     * @return array<string, mixed> The processed settings.
      */
-    public function sanitize_settings( $input )
+    public function sanitize_settings( $input ) : array
     {
         $settings = $this->get_default_settings();
 
@@ -270,10 +252,10 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#callback:do_settings_fields()
      *
-     * @param  array $args Field output arguments.
+     * @param  array<string, mixed> $args Field output arguments.
      * @return void
      */
-    public function display_settings_field( array $args = [] )
+    public function display_settings_field( array $args = [] ) : void
     {
         $fields = [
             'the_content' => __( 'Below content',    'simple_footnotes' ),
@@ -301,10 +283,10 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#filter:mce_buttons
      *
-     * @param  array $buttons First-row list of buttons.
-     * @return array
+     * @param  string[] $buttons First-row list of buttons.
+     * @return string[]
      */
-    public function mce_buttons( $buttons )
+    public function mce_buttons( array $buttons ) : array
     {
         $key = array_search( 'blockquote', $buttons );
 
@@ -322,10 +304,10 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#filter:mce_external_plugins
      *
-     * @param  array $plugins An array of external TinyMCE plugins.
-     * @return array
+     * @param  array<string, string> $plugins An array of external TinyMCE plugins.
+     * @return array<string, string>
      */
-    public function mce_external_plugins( $plugins )
+    public function mce_external_plugins( array $plugins ) : array
     {
         $plugins[$this->option_name] = plugins_url( '/resources/tinymce/plugin.js', __DIR__ );
 
@@ -337,10 +319,10 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#filter:mce_external_languages
      *
-     * @param  array $translations Translations for external TinyMCE plugins.
-     * @return array
+     * @param  array<string, string> $translations Translations for external TinyMCE plugins.
+     * @return array<string, string>
      */
-    public function mce_external_languages( $translations )
+    public function mce_external_languages( array $translations ) : array
     {
         $translations[$this->option_name] = plugin_dir_path( __DIR__ ) . 'resources/tinymce/translations.php';
 
@@ -349,10 +331,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Registers the shortcodes.
-     *
-     * @return void
      */
-    public function add_shortcodes()
+    public function add_shortcodes() : void
     {
         add_shortcode( static::SHORTCODE_TAG, [ $this, 'render_ref_shortcode' ] );
     }
@@ -370,7 +350,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  string $content Content to parse.
      * @return string Content with shortcode parsed.
      */
-    public function do_shortcode( $content )
+    public function do_shortcode( string $content ) : string
     {
         global $shortcode_tags;
 
@@ -401,11 +381,11 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @fires filter:footnote_reference_link_html_template
      * @fires filter:footnote_reference_html_template
      *
-     * @param  array       $shortcode_attrs Shortcode attributes.
-     * @param  string|null $shortcode_text  The content within the shortcode tags.
+     * @param  array<string, mixed> $shortcode_attrs Shortcode attributes.
+     * @param  ?string              $shortcode_text  The content within the shortcode tags.
      * @return ?string
      */
-    public function render_ref_shortcode( $shortcode_attrs, $shortcode_text = null )
+    public function render_ref_shortcode( array $shortcode_attrs, ?string $shortcode_text = null ) : ?string
     {
         if ( $shortcode_text === '' ) {
             $shortcode_text = null;
@@ -643,7 +623,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  string $content Content of the current comment.
      * @return string The processed comment.
      */
-    public function append_to_comment_text( $content )
+    public function append_to_comment_text( string $content ) : string
     {
         return $this->append( $content );
     }
@@ -658,7 +638,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  string $content Content of the current post.
      * @return string The processed content.
      */
-    public function append_to_post_content( $content )
+    public function append_to_post_content( string $content ) : string
     {
         global $multipage;
 
@@ -678,10 +658,10 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @listens WP#filter:wp_link_pages_args
      *
-     * @param  array $args Arguments for page links for paginated posts.
-     * @return array The filtered arguments.
+     * @param  array<string, mixed> $args Arguments for page links for paginated posts.
+     * @return array<string, mixed> The filtered arguments.
      */
-    public function append_to_link_pages_args( $args )
+    public function append_to_link_pages_args( array $args ) : array
     {
         if ( 'page_links' === $this->placement ) {
             $args['after'] = $this->append( $args['after'] );
@@ -697,7 +677,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  object $note    The footnote instance.
      * @return int The zero-based indexed for $footnote.
      */
-    public function get_footnote_absolute_index( $content, $note )
+    public function get_footnote_absolute_index( string $content, object $note ) : int
     {
         $pattern = '/\[ref .*?(?:(?:id|note)="(.*?)").*?\]/s';
         preg_match_all( $pattern, $content, $matches );
@@ -705,14 +685,14 @@ class Footnotes implements \Countable, \IteratorAggregate
         if ( isset( $note->id ) ) {
             $index = array_search( $note->id, $matches[1] );
             if ( false !== $index ) {
-                return $index;
+                return (int) $index;
             }
         }
 
         if ( isset( $note->text ) ) {
             $index = array_search( $note->text, $matches[1] );
             if ( false !== $index ) {
-                return $index;
+                return (int) $index;
             }
         }
 
@@ -734,7 +714,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  object $note  The footnote instance.
      * @return int The adjusted number.
      */
-    public function maybe_paginate_footnotes( $index, $type, $id, $note )
+    public function maybe_paginate_footnotes( int $index, string $type, int $id, object $note ) : int
     {
         global $numpages, $pagenow, $post;
 
@@ -764,10 +744,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Removes all collected footnotes.
-     *
-     * @return void
      */
-    public function clear()
+    public function clear() : void
     {
         $this->footnotes = [];
     }
@@ -778,7 +756,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  string $content The content to process.
      * @return string The content with HTML footnotes.
      */
-    public function append( $content )
+    public function append( string $content ) : string
     {
         $extra = $this->render();
         if ( empty( $extra ) ) {
@@ -801,7 +779,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @return ?string The HTML footnotes.
      */
-    public function render_items()
+    public function render_items() : ?string
     {
         global $numpages, $pagenow;
 
@@ -958,7 +936,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @return ?string The HTML footnotes.
      */
-    public function render()
+    public function render() : ?string
     {
         list( $type, $id ) = $this->get_context();
 
@@ -993,9 +971,9 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @global int    $numpages Number of pages in the current post.
      * @global string $pagenow  Current Admin page.
      *
-     * @return array Array of collected footnotes.
+     * @return array<int, object> Array of collected footnotes.
      */
-    public function all()
+    public function all() : array
     {
         list( $type, $id ) = $this->get_context();
 
@@ -1015,7 +993,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      *
      * @return bool Returns FALSE if any footnotes have been collected.
      */
-    public function is_empty()
+    public function is_empty() : bool
     {
         list( $type, $id ) = $this->get_context();
 
@@ -1028,10 +1006,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Counts the number of collected footnotes.
-     *
-     * @return int
      */
-    public function count()
+    public function count() : int
     {
         list( $type, $id ) = $this->get_context();
 
@@ -1044,12 +1020,10 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Get the blocks iterator.
-     *
-     * @return Traversable
      */
-    public function getIterator()
+    public function getIterator() : \Traversable
     {
-        return new ArrayIterator( $this->all() );
+        return new \ArrayIterator( $this->all() );
     }
 
     /**
@@ -1083,8 +1057,7 @@ class Footnotes implements \Countable, \IteratorAggregate
     /**
      * Retrieves a global note by ID.
      *
-     * @param  string $id The note ID.
-     * @return ?object
+     * @param string $id The note ID.
      */
     public static function get_global_note( string $id ) : ?object
     {
@@ -1099,8 +1072,6 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Counts the number of available global notes.
-     *
-     * @return int
      */
     public static function count_global_notes() : int
     {
@@ -1111,8 +1082,6 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Determines if there are any available global notes.
-     *
-     * @return bool
      */
     public static function has_any_global_notes() : bool
     {
@@ -1123,8 +1092,6 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Determines if there are more than one available global notes.
-     *
-     * @return bool
      */
     public static function has_many_global_notes() : bool
     {
@@ -1139,9 +1106,9 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @global \WP_Comment $comment Global comment object.
      * @global \WP_Post    $post    Global post object.
      *
-     * @return array
+     * @return list{string, int}
      */
-    protected function get_context()
+    protected function get_context() : array
     {
         global $comment, $post;
 
@@ -1169,10 +1136,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Upgrades the database settings.
-     *
-     * @return void
      */
-    protected function upgrade()
+    protected function upgrade() : void
     {
         // Check if DB needs to be upgraded
         if (
@@ -1199,10 +1164,8 @@ class Footnotes implements \Countable, \IteratorAggregate
 
     /**
      * Loads the current settings.
-     *
-     * @return void
      */
-    protected function load_settings()
+    protected function load_settings() : void
     {
         $options = get_option( $this->option_name );
 
@@ -1228,7 +1191,7 @@ class Footnotes implements \Countable, \IteratorAggregate
      * @param  int       $accepted_args   Optional. The number of arguments the function accepts. Default 1.
      * @return bool Returns FALSE if the $function_to_add is not callable, otherwise returns TRUE.
      */
-    protected function add_action_on_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 )
+    protected function add_action_on_filter( string $tag, callable $function_to_add, $priority = 10, int $accepted_args = 1 ) : bool
     {
         $proxy_function = function ( $value ) use ( $function_to_add ) {
             call_user_func_array( $function_to_add, func_get_args() );
@@ -1242,8 +1205,6 @@ class Footnotes implements \Countable, \IteratorAggregate
      * Loads the global notes.
      *
      * @fires filter:footnote_global_notes
-     *
-     * @return void
      */
     protected static function load_global_notes() : void
     {

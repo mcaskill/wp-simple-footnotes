@@ -27,5 +27,8 @@ $messages = [
     'selectionRequired' => __( 'You must select text to add note.', 'simple_footnotes' ),
 ];
 
-$locale  = _WP_Editors::$mce_locale;
-$strings = 'tinyMCE.addI18n( "' . $locale . '.simple_footnotes", ' . json_encode( $messages ) . " );\n";
+$strings = sprintf(
+    'tinyMCE.addI18n( "%s.simple_footnotes", %s );' . "\n",
+    _WP_Editors::$mce_locale,
+    json_encode( $messages )
+);

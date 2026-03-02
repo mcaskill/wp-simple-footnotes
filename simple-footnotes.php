@@ -3,13 +3,16 @@
 /**
  * @wordpress-plugin
  *
- * Plugin Name:  Simple Footnotes
- * Plugin URI:   https://github.com/mcaskill/wp-simple-footnotes
- * Description:  Create simple, elegant footnotes on your site. Use the <code>[ref note="My note." /]</code> shortcode (<code>[ref note="My note."]My marker.[/ref]</code>) and the plugin takes care of the rest. There's also a <a href="options-reading.php">setting</a> that enables you to move the footnotes below your page links, for those who paginate posts.
- * Version:      3.0.0-alpha.2
- * Author:       Chauncey McAskill, Andrew Nacin
- * Text Domain:  simple_footnotes
- * License:      MIT License
+ * Plugin Name:       Simple Footnotes
+ * Plugin URI:        https://github.com/mcaskill/wp-simple-footnotes
+ * Description:       Create simple, elegant footnotes on your site. Use the <code>[ref note="My note." /]</code> shortcode (<code>[ref note="My note."]My marker.[/ref]</code>) and the plugin takes care of the rest. There's also a <a href="options-reading.php">setting</a> that enables you to move the footnotes below your page links, for those who paginate posts.
+ * Version:           2.0.0
+ * Requires PHP:      7.4
+ * Requires at least: 6.3
+ * Tested up to:      6.9
+ * Author:            Chauncey McAskill, Andrew Nacin
+ * Text Domain:       simple_footnotes
+ * License:           MIT License
  */
 
 namespace McAskill\WordPress\Footnotes;
@@ -22,11 +25,10 @@ require_once __DIR__ . '/includes/class-footnotes.php';
 
 /**
  * Get the main instance of Simple Footnotes.
- *
- * @return Footnotes
  */
-function simple_footnotes()
+function simple_footnotes() : Footnotes
 {
+    /** @var Footnotes */
     global $wp_simple_footnotes;
 
     if ( ! ( $wp_simple_footnotes instanceof Footnotes ) ) {
